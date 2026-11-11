@@ -1,0 +1,14 @@
+{
+  "name": "modern-java-guidance",
+  "owner": {
+    "name": "Venu Mittapalli",
+    "url": "https://github.com/venumittapalli576"
+  },
+  "plugins": [
+    {
+      "name": "modern-java-guidance",
+      "source": "./",
+      "description": "Keeps coding agents on current Java and Spring Boot: 100 legacy-to-modern guides, a JDK-only scanner, and a hook that checks what the agent just wrote."
+    }
+  ]
+}

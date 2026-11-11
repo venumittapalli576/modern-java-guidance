@@ -1,0 +1,10 @@
+# build output (note: "build/" is not ignored, because guides/build/ is a guide category)
+target/
+/out/
+*.class
+
+# editors and operating systems
+.idea/
+.vscode/
+*.iml
+.DS_Store

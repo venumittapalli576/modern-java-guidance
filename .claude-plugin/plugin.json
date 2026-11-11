@@ -1,0 +1,13 @@
+{
+  "name": "modern-java-guidance",
+  "version": "0.1.0",
+  "description": "Keeps coding agents on current Java and Spring Boot: 100 legacy-to-modern guides, a JDK-only scanner, and a hook that checks what the agent just wrote.",
+  "author": {
+    "name": "Venu Mittapalli",
+    "url": "https://github.com/venumittapalli576"
+  },
+  "homepage": "https://github.com/venumittapalli576/modern-java-guidance",
+  "repository": "https://github.com/venumittapalli576/modern-java-guidance",
+  "license": "Apache-2.0",
+  "keywords": ["java", "spring-boot", "spring", "jakarta", "modernization", "legacy", "linter"]
+}

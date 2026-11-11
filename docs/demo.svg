@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1001 566" width="1001" height="566" role="img" aria-label="LegacyScan output for a generated Spring Security configuration on Spring Boot 4.1: 7 findings, 6 of them APIs that were removed">
+<style>text{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:13.5px;fill:#c9d1d9;white-space:pre}.dim{fill:#8b949e}.b{font-weight:700;fill:#f0f6fc}.t{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:12.5px;fill:#8b949e}</style>
+<rect width="1001" height="566" rx="10" fill="#0d1117"/>
+<rect width="1001" height="36" rx="10" fill="#161b22"/><rect y="26" width="1001" height="10" fill="#161b22"/>
+<circle cx="22" cy="18" r="6" fill="#ff5f56"/><circle cx="42" cy="18" r="6" fill="#ffbd2e"/><circle cx="62" cy="18" r="6" fill="#27c93f"/>
+<text class="t" x="500.5" y="22" text-anchor="middle">examples/legacy-shop</text>
+<text x="22" y="58" xml:space="preserve"><tspan class="dim">$</tspan><tspan class="b"> java LegacyScan.java scan src/main/java/com/example/shop/SecurityConfig.java --min deprecated</tspan></text>
+<text class="b" x="22" y="96" xml:space="preserve">src/main/java/com/example/shop/SecurityConfig.java</text>
+<text x="22" y="115" xml:space="preserve"><tspan class="dim">      9  </tspan><tspan fill="#ff7b72" font-weight="700">removed</tspan>     Declare a SecurityFilterChain bean instead of extending WebSecurityConfigurerAdapter</text>
+<text class="dim" x="22" y="134" xml:space="preserve">                     [security-filter-chain] (+1 more in this file)</text>
+<text class="dim" x="22" y="153" xml:space="preserve">                     WebSecurityConfigurerAdapter was deprecated in Spring Security 5.7 and removed in 6.0 (Spring</text>
+<text class="dim" x="22" y="172" xml:space="preserve">                     Boot 3). Security configuration is now a set of beans.</text>
+<text x="22" y="191" xml:space="preserve"><tspan class="dim">     16  </tspan><tspan fill="#e3b341" font-weight="700">deprecated</tspan>  Use @EnableMethodSecurity instead of @EnableGlobalMethodSecurity<tspan class="dim">  [enable-method-security]</tspan></text>
+<text class="dim" x="22" y="210" xml:space="preserve">                     @EnableGlobalMethodSecurity is deprecated in Spring Security 6. @EnableMethodSecurity turns on</text>
+<text class="dim" x="22" y="229" xml:space="preserve">                     @PreAuthorize and @PostAuthorize by default, so prePostEnabled = true is no longer needed.</text>
+<text x="22" y="248" xml:space="preserve"><tspan class="dim">     24  </tspan><tspan fill="#ff7b72" font-weight="700">removed</tspan>     Configure HttpSecurity with the lambda DSL, without and()<tspan class="dim">  [security-lambda-dsl]</tspan></text>
+<text class="dim" x="22" y="267" xml:space="preserve">                     The chained style, csrf().disable() joined with and(), was deprecated in Spring Security 6.1 and</text>
+<text class="dim" x="22" y="286" xml:space="preserve">                     removed in 7.0 (Spring Boot 4). Each configurer takes a lambda, available since 5.2.</text>
+<text x="22" y="305" xml:space="preserve"><tspan class="dim">     25  </tspan><tspan fill="#ff7b72" font-weight="700">removed</tspan>     Configure HttpSecurity with the lambda DSL, without and()<tspan class="dim">  [security-lambda-dsl]</tspan></text>
+<text x="22" y="324" xml:space="preserve"><tspan class="dim">     26  </tspan><tspan fill="#ff7b72" font-weight="700">removed</tspan>     Configure HttpSecurity with the lambda DSL, without and()<tspan class="dim">  [security-lambda-dsl]</tspan></text>
+<text x="22" y="343" xml:space="preserve"><tspan class="dim">     27  </tspan><tspan fill="#ff7b72" font-weight="700">removed</tspan>     Use authorizeHttpRequests instead of authorizeRequests<tspan class="dim">  [authorize-http-requests]</tspan></text>
+<text class="dim" x="22" y="362" xml:space="preserve">                     authorizeRequests() was deprecated in Spring Security 6 and removed in 7.0 (Spring Boot 4).</text>
+<text class="dim" x="22" y="381" xml:space="preserve">                     authorizeHttpRequests() is its replacement, built on the AuthorizationManager API.</text>
+<text x="22" y="400" xml:space="preserve"><tspan class="dim">     28  </tspan><tspan fill="#ff7b72" font-weight="700">removed</tspan>     Use requestMatchers instead of antMatchers, mvcMatchers and regexMatchers<tspan class="dim">  [request-matchers]</tspan></text>
+<text class="dim" x="22" y="419" xml:space="preserve">                     antMatchers(), mvcMatchers() and regexMatchers() were deprecated in Spring Security 5.8 and</text>
+<text class="dim" x="22" y="438" xml:space="preserve">                     removed in 6.0 (Spring Boot 3). requestMatchers() picks the right matcher for the application.</text>
+<text class="dim" x="22" y="476" xml:space="preserve">Project: Java 21, Spring Boot 4.1 [pom.xml]</text>
+<text x="22" y="495" xml:space="preserve"><tspan class="b">7 findings in 1 of 1 file</tspan>: <tspan fill="#ff7b72" font-weight="700">6 removed</tspan>, <tspan fill="#e3b341" font-weight="700">1 deprecated</tspan></text>
+<text x="22" y="514" xml:space="preserve"><tspan class="b">Carbon date: 2019</tspan>. The oldest pattern here (security-lambda-dsl) has had a standard replacement for 7 years.</text>
+<text class="dim" x="22" y="533" xml:space="preserve">Read a guide: java LegacyScan.java explain &lt;id&gt;</text>
+</svg>

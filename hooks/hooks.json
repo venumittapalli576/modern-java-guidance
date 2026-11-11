@@ -1,0 +1,17 @@
+{
+  "description": "Checks the Java, build, Docker and config lines the agent just wrote for legacy patterns that have a modern replacement.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/post-edit.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

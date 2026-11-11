@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scanner:
+    name: Scanner and guides on JDK ${{ matrix.java }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['17', '21', '25']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+      - name: End-to-end tests (includes the guide self-test and the index check)
+        run: sh tests/run.sh
+
+  examples-jdk:
+    name: JDK examples compile with no deprecation warnings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Java 21 level
+        run: |
+          javac --release 21 -Xlint:deprecation,removal -Werror -d out/21 examples/modern-jdk/ModernJdk.java
+          java -cp out/21 ModernJdk
+      - name: Java 25 level
+        run: |
+          javac --release 25 -Xlint:deprecation,removal -Werror -d out/25 examples/modern-jdk/ModernJdk25.java
+          java -cp out/25 ModernJdk25
+
+  examples-spring:
+    name: Spring Boot 4 example builds and passes its tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - run: mvn --batch-mode --no-transfer-progress --file examples/modern-shop/pom.xml verify
+
+  examples-scan:
+    name: Modern examples are clean and the legacy example is caught
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: The modern examples have no findings at all
+        run: |
+          out=$(java skills/modern-java-guidance/scripts/LegacyScan.java scan examples/modern-shop examples/modern-jdk --java 25)
+          echo "$out"
+          echo "$out" | grep -q "no legacy patterns found"
+      - name: The legacy example fails the scan
+        run: |
+          if java skills/modern-java-guidance/scripts/LegacyScan.java scan examples/legacy-shop --format github; then
+            echo "The legacy example should have produced removed findings"
+            exit 1
+          fi
