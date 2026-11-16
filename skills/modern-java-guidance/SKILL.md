@@ -1,10 +1,10 @@
 ---
 name: modern-java-guidance
-description: Keeps Java and Spring Boot code current. Use whenever writing, editing, reviewing or migrating Java source, Spring Boot or Spring Security configuration, JPA entities, tests, Maven or Gradle builds, application.properties or application.yml, Dockerfiles or JVM flags for a Java application. Covers javax to jakarta, Spring Boot 3 and 4, Spring Security 6 and 7, Jackson 3, JUnit Jupiter, Java 17 to 25 language features, virtual threads, and removed JDK APIs and JVM options. Includes a scanner (JDK only, no install) that finds legacy patterns in the lines you changed.
+description: Keeps Java and Spring Boot code current. Use whenever writing, editing, reviewing or migrating Java source, Spring Boot or Spring Security configuration, JPA entities, tests, Maven or Gradle builds, application.properties or application.yml, Dockerfiles or JVM flags for a Java application. Covers javax to jakarta, Spring Boot 3 and 4, Spring Security 6 and 7, Jackson 3, JUnit Jupiter, Java 17 to 25 language features, virtual threads, and removed JDK APIs and JVM options. Also covers AI application code on the JVM: Spring AI 1 and 2, LangChain4j 1.x, the OpenAI and Google Gen AI Java SDKs, MCP annotations, and LLM model ids that have been shut down. Includes a scanner (JDK only, no install) that finds legacy patterns in the lines you changed.
 license: Apache-2.0
 compatibility: The bundled scanner needs a JDK 17 or later on PATH. The guides need nothing.
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   homepage: https://github.com/venumittapalli576/modern-java-guidance
 ---
 
@@ -12,7 +12,7 @@ metadata:
 
 Most Java ever published was written for Java 8 and Spring Boot 1 or 2. Left alone, a model reproduces that majority: `javax.*` imports, `WebSecurityConfigurerAdapter`, `RestTemplate`, `@MockBean`, JUnit 4, `new Date()`, and JVM flags that stop a current JVM from starting. Some of it is merely dated. Much of it no longer compiles.
 
-This skill is 100 short guides, each a legacy pattern with its current replacement, the version where the replacement became available, and the version where the old form was deprecated or removed. A bundled scanner enforces the same guides mechanically.
+This skill is 117 short guides, each a legacy pattern with its current replacement, the version where the replacement became available, and the version where the old form was deprecated or removed. A bundled scanner enforces the same guides mechanically.
 
 ## How to work
 
@@ -74,6 +74,13 @@ Check the "from" column against the project before applying a row.
 | `JobBuilderFactory`, `StepBuilderFactory` | `new JobBuilder(name, jobRepository)`, `new StepBuilder(...)` | Boot 3.0 |
 | JJWT `setSigningKey`, `parseClaimsJws`, `SignatureAlgorithm.HS256` | JJWT 0.12: `verifyWith(key)`, `parseSignedClaims`, `signWith(key)` | JJWT 0.12 |
 | `com.amazonaws.*` (AWS SDK 1.x) | `software.amazon.awssdk.*` (2.x) | Always |
+| `spring-ai-openai-spring-boot-starter` | `spring-ai-starter-model-openai`, with the `spring-ai-bom` | Spring AI 1.0 |
+| `FunctionCallback`, `.functions(...)`, `.defaultFunctions(...)` | `@Tool` methods passed with `.tools(...)` or `.defaultTools(...)` | Spring AI 1.0, removed in 2.0 |
+| `PromptChatMemoryAdvisor`, an advisor built with a fixed `conversationId(...)` | `MessageChatMemoryAdvisor`, and `ChatMemory.CONVERSATION_ID` on every call | Spring AI 2.0 |
+| `.toolNames("...")`, `spring.ai.openai.chat.options.model` | Explicit `.tools(...)`, `spring.ai.openai.chat.model` | Spring AI 2.0 |
+| `ChatLanguageModel`, `model.generate(...)`, `StreamingResponseHandler<AiMessage>` | `ChatModel`, `model.chat(...)`, `StreamingChatResponseHandler` | LangChain4j 1.0 |
+| `com.theokanning.openai`, `com.google.cloud.vertexai.generativeai` | `com.openai:openai-java`, `com.google.genai:google-genai` | Always |
+| `"gpt-4"`, `"gpt-3.5-turbo"`, `"claude-3-5-sonnet-20241022"`, `"gemini-1.5-pro"` | No model id from memory. Look up the provider's current list, or read the id from configuration | All shut down |
 | `new Date()`, `Calendar`, `SimpleDateFormat` | `java.time`: `Instant`, `LocalDate`, `DateTimeFormatter` | Java 8 |
 | Lombok `@Value` class for a DTO | `record` | Java 16 |
 | `if (o instanceof Foo) { Foo f = (Foo) o;` | `if (o instanceof Foo f)` | Java 16 |
@@ -95,6 +102,9 @@ Newer material gets these wrong, so they turn up in code that otherwise looks up
 - **String templates (`STR."..."`) do not exist.** They were a preview in Java 21 and 22 and were withdrawn in 23.
 - **Do not rewrite `synchronized` to `ReentrantLock` "to avoid pinning virtual threads".** That was true on Java 21 to 23. Java 24 fixed it (JEP 491).
 - **Primitive type patterns and lazy constants are previews** through Java 27. Scoped values are final from Java 25. Unnamed variables (`_`) are final from Java 22.
+- **A model id you remember is probably retired.** OpenAI shut down `gpt-4`, `gpt-4-turbo` and `gpt-3.5-turbo` on 2026-10-23. Claude 3.x, Claude 4.0 and 4.1, and Gemini 1.x and 2.0 ids are gone as well. The code compiles and every real request fails. Never write a model id from memory: look it up, or leave it in configuration and ask. See `guides/llm/retired-model-ids.md`.
+- **Spring AI 1 is for Spring Boot 3, Spring AI 2 is for Spring Boot 4.** Most Spring AI samples predate 1.0 and use starter names, `FunctionCallback` and option keys that no release has.
+- **In Spring AI 2, `ChatModel.call` does not run tools.** The tool loop lives in `ChatClient`. A direct `ChatModel` call returns the raw tool-call request.
 - **Spring Boot 4 still runs on Java 17.** Do not raise a project's Java level as a side effect of a Boot upgrade.
 - **Jackson annotations did not move.** On Boot 4, `@JsonProperty` is still `com.fasterxml.jackson.annotation.JsonProperty`. Only databind, core and the modules moved to `tools.jackson`.
 - **JDK `javax` packages did not move.** `javax.sql`, `javax.crypto`, `javax.net.ssl`, `javax.naming`, `javax.xml.parsers` and `javax.annotation.processing` are correct as they are.
@@ -133,3 +143,6 @@ The scanner is pattern-based. It does not compile the code or resolve types, so 
 | `build` | Maven and Gradle settings, relocated artifacts |
 | `runtime` | JVM flags and container base images |
 | `libraries` | JJWT, AWS SDK, logging, Commons, Guava |
+| `spring-ai` | Spring AI 1 and 2: starters, tools, chat memory, MCP, configuration keys |
+| `langchain4j` | LangChain4j 1.x: ChatModel, streaming, token counting |
+| `llm` | Retired model ids, the official OpenAI and Google Gen AI SDKs |

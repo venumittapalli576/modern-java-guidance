@@ -8,7 +8,7 @@ This repository teaches coding agents current Java and Spring Boot. Its own cont
 - `skills/modern-java-guidance/scripts/LegacyScan.java`: the scanner. One file, Java 17 language level, no dependencies. Keep it that way.
 - `skills/modern-java-guidance/SKILL.md`: what an agent reads first. `INDEX.md` beside it is generated.
 - `hooks/`, `.claude-plugin/`: the Claude Code plugin.
-- `examples/`: `legacy-shop` is deliberately legacy and must keep failing the scan. `modern-shop` and `modern-jdk` must stay clean and must keep building.
+- `examples/`: `legacy-shop` and `legacy-assistant` are deliberately legacy and must keep failing the scan. `modern-shop`, `modern-assistant` and `modern-jdk` must stay clean and must keep building.
 - `tests/run.sh`: the end-to-end tests.
 
 ## Before you finish any change
@@ -25,5 +25,6 @@ java skills/modern-java-guidance/scripts/LegacyScan.java index   # only if a gui
 - A detector that is sometimes wrong is worse than no detector. Prefer a narrow pattern, and use `when-file` to require context.
 - The After example must be clean under every guide, not just its own. `selftest` enforces this.
 - Do not use preview features in After examples.
+- Never write a model id from memory, here or anywhere else. `guides/llm/retired-model-ids.md` lists what has been shut down; add to it only with a link to the provider's own page.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the guide format.
