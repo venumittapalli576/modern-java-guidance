@@ -4,14 +4,16 @@
 
 [![CI](https://github.com/venumittapalli576/modern-java-guidance/actions/workflows/ci.yml/badge.svg)](https://github.com/venumittapalli576/modern-java-guidance/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Guides: 100](https://img.shields.io/badge/guides-100-success.svg)](skills/modern-java-guidance/INDEX.md)
+[![Guides: 117](https://img.shields.io/badge/guides-117-success.svg)](skills/modern-java-guidance/INDEX.md)
 [![Runs on: JDK 17+](https://img.shields.io/badge/runs%20on-JDK%2017%2B-orange.svg)](#the-scanner)
 
 Most Java ever published was written for Java 8 and Spring Boot 1 or 2, and that is what a coding agent has read the most of. Ask one for a Spring Boot service and you get `javax.persistence`, `WebSecurityConfigurerAdapter`, `RestTemplate`, `@MockBean`, JUnit 4 and a Dockerfile with `-XX:MaxPermSize`. On Spring Boot 4 and Java 25, half of that does not compile and some of it stops the JVM from starting.
 
+AI application code has it worse, because that ecosystem moves fastest. Ask for a Spring AI service and you get `spring-ai-openai-spring-boot-starter`, `FunctionCallback` and `.model("gpt-4")`. The starter was renamed before Spring AI 1.0 shipped, `FunctionCallback` is gone from Spring AI 2, and OpenAI shut `gpt-4` down on 23 October 2026. It compiles in the agent's head and nowhere else.
+
 This repository is three things that fix it:
 
-- **100 guides**, each one legacy pattern with its current replacement, the version where the replacement arrived, and the version where the old form was deprecated or removed.
+- **117 guides**, each one legacy pattern with its current replacement, the version where the replacement arrived, and the version where the old form was deprecated or removed.
 - **A scanner** that enforces the same guides. It is one Java file with no dependencies. If you have a JDK, you can run it.
 - **An agent skill and a Claude Code hook**, so the agent writes the current form and gets corrected on the lines it just wrote.
 
@@ -76,9 +78,42 @@ Three properties matter here:
 - **It knows the project's versions.** The same `@MockBean` is fine on Boot 3.3, deprecated on 3.4 and removed on 4.0, and the hook says which.
 - **It cannot break your session.** No JDK, bad input or an internal error all end in a silent exit.
 
+## AI application code
+
+Seventeen of the guides are about building LLM applications on the JVM: Spring AI 1 and 2, LangChain4j 1.x, the provider SDKs, and model ids. [`examples/legacy-assistant`](examples/legacy-assistant) is a support assistant the way a 2024 tutorial writes it. This is the scan, with the explanations shortened:
+
+```
+$ java LegacyScan.java scan examples/legacy-assistant
+
+pom.xml
+     27  removed     Use the Spring AI 1.0 starter names  [spring-ai-starter-names]
+     31  removed     Use the chat memory repository modules and keys  [spring-ai-chat-memory-repository]
+     34  deprecated  Use the official OpenAI Java SDK, not the archived community client  [openai-official-java-sdk]
+
+src/main/java/com/example/assistant/SupportAssistant.java
+      3  removed     Use ChatMemory.CONVERSATION_ID for the conversation id  [spring-ai-conversation-id]
+      6  removed     Use MessageChatMemoryAdvisor and pass the conversation id per call
+      8  removed     Use @Tool and ToolCallback instead of FunctionCallback  [spring-ai-tool-callbacks]
+     19  removed     Do not hard-code a retired model id  [retired-model-ids]
+                     OpenAI shut down gpt-4, gpt-4-turbo and gpt-3.5-turbo on 2026-10-23. Claude 3.x, Claude 4.0 and
+                     4.1, and Gemini 1.x and 2.0 ids are retired as well. A request that names a retired id fails.
+
+src/main/resources/application.properties
+      2  removed     Do not hard-code a retired model id  [retired-model-ids]
+      2  deprecated  Drop .options from Spring AI configuration keys  [spring-ai-options-properties]
+      4  removed     Select a model provider with spring.ai.model.*  [spring-ai-model-selection]
+
+Project: Java 25, Spring Boot 4.1 [pom.xml]
+15 findings in 3 of 3 files: 12 removed, 3 deprecated
+```
+
+[`examples/modern-assistant`](examples/modern-assistant) is the same assistant on Spring AI 2: `@Tool` methods, `MessageChatMemoryAdvisor`, a conversation id on every call, and the model id in configuration. CI builds it.
+
+The retired-model check is deliberately narrow. It knows ids that the provider's own page lists as shut down, it reads Java strings and Spring configuration files, and it leaves alone anything with a platform prefix (`anthropic.claude-...` on Bedrock, `openai/gpt-...` behind a gateway) and any line that names a deployment, because those follow someone else's schedule.
+
 ## What it covers
 
-100 guides in 16 categories. The full list, with statuses and version ranges, is in [INDEX.md](skills/modern-java-guidance/INDEX.md).
+117 guides in 19 categories. The full list, with statuses and version ranges, is in [INDEX.md](skills/modern-java-guidance/INDEX.md).
 
 | Area | Examples |
 |---|---|
@@ -94,6 +129,9 @@ Three properties matter here:
 | Concurrency | Virtual threads, scoped values, and what is still a preview |
 | Runtime | 36 JVM flags that stop a current JVM from starting, deprecated container base images |
 | Build | `maven.compiler.release`, removed Gradle configurations, relocated artifacts, Java 8 under a Boot 3 parent |
+| Spring AI 1 and 2 | Milestone starter names, `FunctionCallback`, `PromptChatMemoryAdvisor`, `toolNames`, `AnthropicApi`, the Azure OpenAI module, MCP annotation packages, renamed configuration keys |
+| LangChain4j 1.x | `ChatLanguageModel`, `generate`, `StreamingResponseHandler<AiMessage>`, `Tokenizer` |
+| LLM providers | Model ids that have been shut down, the archived community OpenAI client, the deprecated Vertex AI `generativeai` package |
 | Ecosystem | Zuul, Hystrix and Ribbon, Sleuth, `@StreamListener`, Kafka `ListenableFuture`, Spring Batch builder factories, JJWT 0.9, AWS SDK 1.x, Log4j 1 |
 
 Every finding has one of four statuses:
@@ -109,6 +147,7 @@ Every finding has one of four statuses:
 
 A lot of "modern Java" advice written for agents is itself out of date. These guides exist because generated code that otherwise looks current keeps getting them wrong:
 
+- **The model id in the example is retired.** `gpt-4`, `gpt-3.5-turbo`, `claude-3-5-sonnet-20241022` and `gemini-1.5-pro` are the ids most sample code uses, and none of them answers any more. An agent should never write a model id from memory.
 - **`StructuredTaskScope` is still a preview**, in its seventh round in Java 27. Its API changed in Java 25, so the `ShutdownOnFailure` example from every Java 21 article no longer compiles.
 - **String templates (`STR."..."`) were withdrawn** in Java 23. They are in no release.
 - **"Replace `synchronized` with `ReentrantLock` to avoid pinning virtual threads"** was right for Java 21 to 23. Java 24 removed the problem (JEP 491), and the rewrite now only adds risk. The scanner even catches the comment that usually accompanies it.
@@ -168,10 +207,11 @@ disable=switch-expressions
 Guidance for agents is easy to write and easy to get wrong, so this project checks itself.
 
 - **The guides are the rules.** Each guide's front matter carries its own detection patterns. There is no second rule file to drift away from the documentation.
-- **Every guide proves itself.** `selftest` checks that each guide's Before example is caught, that every detector is exercised by an example, and that every After example is clean under all 100 guides. It currently covers 126 detectors and 224 examples.
-- **The After code builds.** [`examples/modern-jdk`](examples/modern-jdk) compiles with `-Xlint:deprecation,removal -Werror`, and [`examples/modern-shop`](examples/modern-shop) is a Spring Boot 4 application that CI builds and tests on JDK 25.
+- **Every guide proves itself.** `selftest` checks that each guide's Before example is caught, that every detector is exercised by an example, and that every After example is clean under all 117 guides. It currently covers 152 detectors and 270 examples.
+- **The After code builds.** [`examples/modern-jdk`](examples/modern-jdk) compiles with `-Xlint:deprecation,removal -Werror`, [`examples/modern-shop`](examples/modern-shop) is a Spring Boot 4 application that CI builds and tests on JDK 25, and [`examples/modern-assistant`](examples/modern-assistant) is built the same way against Spring AI 2.0.1.
 - **The JVM flag guides were run, not remembered.** All 36 options listed as stopping the JVM were passed to JDK 21 and observed to end in `Could not create the Java Virtual Machine`.
 - **Every guide cites a primary source**: a JEP, the Spring or Hibernate migration guide, or the project's own release notes.
+- **Model retirements were read from each provider's own deprecations page** on 16 November 2026. The guide lists every id with its shutdown date.
 - **It was tried on real code** on 11 November 2026:
 
 | Project | Files scanned | Result |
@@ -188,7 +228,7 @@ The first version of several detectors was wrong on Kafka: it flagged Kafka's ow
 - **For bulk migration, use [OpenRewrite](https://docs.openrewrite.org/).** It rewrites a whole codebase with full type information. This project does a different job: it keeps new code from being written the old way, and tells you where you stand.
 - **Version detection reads the build file as text.** Maven parents, the Spring Boot Gradle plugin, toolchains and version catalogs are understood. Versions computed in build logic are not, and then you need `.modern-java`.
 - **Tested on Linux with JDK 21.** CI adds JDK 17 and 25. The hook is a POSIX shell script. On Windows it needs the Git Bash that Claude Code already uses, and nobody has tried it there yet.
-- **It will go stale too.** Spring Boot 4.2 and Spring Framework 7.1 are arriving as this is published. Guides carry versions and sources so that they can be corrected.
+- **It will go stale too.** Spring Boot 4.2 and Spring Framework 7.1 are arriving as this is published, and model ids are retired every few months. Guides carry versions and sources so that they can be corrected.
 
 ## Contributing
 

@@ -110,7 +110,7 @@ sh tests/run.sh                                                    # everything,
 java skills/modern-java-guidance/scripts/LegacyScan.java index     # regenerate INDEX.md
 ```
 
-If the guide is about JDK APIs, add its After code to `examples/modern-jdk/ModernJdk.java`, which CI compiles with `-Xlint:deprecation,removal -Werror`. If it is about Spring Boot 4, consider showing it in `examples/modern-shop`.
+If the guide is about JDK APIs, add its After code to `examples/modern-jdk/ModernJdk.java`, which CI compiles with `-Xlint:deprecation,removal -Werror`. If it is about Spring Boot 4, consider showing it in `examples/modern-shop`. If it is about Spring AI, show it in `examples/modern-assistant`.
 
 ## Change the scanner
 

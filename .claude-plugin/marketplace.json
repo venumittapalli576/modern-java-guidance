@@ -8,7 +8,7 @@
     {
       "name": "modern-java-guidance",
       "source": "./",
-      "description": "Keeps coding agents on current Java and Spring Boot: 100 legacy-to-modern guides, a JDK-only scanner, and a hook that checks what the agent just wrote."
+      "description": "Keeps coding agents on current Java, Spring Boot, Spring AI and LangChain4j: 117 legacy-to-modern guides, a JDK-only scanner, and a hook that checks what the agent just wrote."
     }
   ]
 }

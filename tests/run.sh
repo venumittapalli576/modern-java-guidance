@@ -170,6 +170,63 @@ public class Ignored {
 JAVA
 expect "ignore comments silence the named guide only" 0 "1 finding in" scan scan "$P/src/main/java/demo/Ignored.java"
 
+# ---------------------------------------------------------------- AI libraries
+ai_project() { # ai_project <dir> <boot version>
+    boot_pom "$1" "$2" 21; mkdir -p "$1/src/main/java/demo" "$1/src/main/resources"
+    cat > "$1/src/main/java/demo/Assistant.java" <<'JAVA'
+package demo;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.model.function.FunctionCallback;
+
+public class Assistant {
+    String retired = "gpt-4";
+    String current = "gpt-4o and gpt-4.1 and gpt-5-mini and claude-sonnet-4-5 are not retired ids";
+    String bedrock = "anthropic.claude-3-sonnet-20240229-v1:0";
+    String gateway = "openai/gpt-4";
+    String azure = client.deploymentName("gpt-4");
+    String gemini = "models/gemini-1.5-flash";
+    Object memory = PromptChatMemoryAdvisor.builder(chatMemory).build();
+}
+JAVA
+    cat > "$1/src/main/resources/application.yml" <<'YAML'
+spring:
+  ai:
+    openai:
+      chat:
+        enabled: true
+        options:
+          model: gpt-3.5-turbo
+    anthropic:
+      chat:
+        model: claude-sonnet-4-5
+YAML
+}
+P="$WORK/ai2"; ai_project "$P" 4.1.2
+expect "ai: a retired model id in a string is removed" 1 "removed +Do not hard-code a retired model id" scan scan "$P"
+expect "ai: exactly the retired ids are reported, in Java and YAML" 1 "3 findings in" scan scan "$P" --only retired-model-ids
+refute "ai: current ids, platform-prefixed ids and deployment names are left alone" "Assistant.java:(8|9|10|11):" scan scan "$P" --only retired-model-ids --format github
+expect "ai: FunctionCallback is removed with Spring AI 2 (boot 4)" 1 "removed +Use @Tool and ToolCallback" scan scan "$P"
+expect "ai: PromptChatMemoryAdvisor is removed with Spring AI 2 (boot 4)" 1 "spring-ai-message-chat-memory-advisor" scan scan "$P"
+expect "ai: provider .enabled switches are removed" 1 "spring-ai-model-selection" scan scan "$P"
+expect "ai: .options keys are deprecated with Spring AI 2" 1 "deprecated +Drop .options" scan scan "$P"
+
+P="$WORK/ai1"; ai_project "$P" 3.5.7
+expect "ai: FunctionCallback is only deprecated with Spring AI 1 (boot 3.5)" 1 "deprecated +Use @Tool and ToolCallback" scan scan "$P"
+refute "ai: PromptChatMemoryAdvisor is fine with Spring AI 1" "spring-ai-message-chat-memory-advisor" scan scan "$P"
+refute "ai: .options keys are current with Spring AI 1" "spring-ai-options-properties" scan scan "$P"
+
+cat > "$WORK/Lc4j.java" <<'JAVA'
+import dev.langchain4j.model.chat.ChatLanguageModel;
+import com.google.cloud.vertexai.generativeai.GenerativeModel;
+class Lc4j { ChatLanguageModel model; }
+JAVA
+expect "ai: LangChain4j ChatLanguageModel is removed" 1 "langchain4j-chat-model" scan scan "$WORK/Lc4j.java"
+expect "ai: the Vertex AI generativeai package is deprecated" 1 "google-genai-sdk" scan scan "$WORK/Lc4j.java"
+
+expect "the modern examples are clean" 0 "no legacy patterns found" scan scan "$ROOT/examples/modern-shop" "$ROOT/examples/modern-assistant" "$ROOT/examples/modern-jdk" --java 25
+expect "the legacy assistant is caught" 1 "12 removed, 3 deprecated" scan scan "$ROOT/examples/legacy-assistant"
+
 # ---------------------------------------------------------------- non-Java files
 P="$WORK/ops"; boot_pom "$P" 4.0.1 25; mkdir -p "$P/src/main/resources"
 cat > "$P/Dockerfile" <<'DOCKER'
